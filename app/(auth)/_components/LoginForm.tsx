@@ -29,21 +29,10 @@ export default function LoginForm() {
         <section className="relative hidden overflow-hidden bg-[#338263] lg:flex">
           <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-white/10" />
 
-          <div className="absolute -bottom-40 -right-20 h-[500px] w-[500px] rounded-full bg-white/10" />
+          <div className="absolute -bottom-40 -right-20 h-125 w-125 rounded-full bg-white/10" />
 
           <div className="relative z-10 flex w-full flex-col justify-between p-12 xl:p-16">
 
-            {/* Logo */}
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-2xl font-bold text-white"
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
-                <Home className="h-5 w-5" />
-              </span>
-
-              RentNest
-            </Link>
 
             {/* Hero */}
             <div className="max-w-xl">
@@ -53,7 +42,7 @@ export default function LoginForm() {
                 Trusted rental platform
               </div>
 
-              <h1 className="text-5xl font-bold leading-tight text-white xl:text-6xl">
+              <h1 className="text-3xl font-bold leading-tight text-white xl:text-5xl">
                 Find a place
                 <br />
                 you&apos;ll love to
@@ -102,9 +91,7 @@ export default function LoginForm() {
               </div>
             </div>
 
-            <p className="text-sm text-emerald-100/60">
-              © 2026 RentNest. All rights reserved.
-            </p>
+            
           </div>
         </section>
 

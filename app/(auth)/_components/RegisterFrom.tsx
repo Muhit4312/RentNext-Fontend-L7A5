@@ -1,11 +1,33 @@
+"use client";
 import Link from "next/link";
 import { ArrowRight, Home, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { registerAction } from "../_aciton/registerAction";
+import { useActionState, useEffect } from "react";
+import { toast } from "sonner";
+
+const initialState = {
+  success: false,
+  statusCode: 0,
+  message: "",
+};
 
 export default function RegisterForm() {
+
+  const [state, action, pending] = useActionState(registerAction, initialState);
+
+  useEffect(() => {
+    if (!state.success) {
+      return
+    }
+    if (!state.success) {
+      toast.error(state.message || "Login failed!")
+    }
+  }, [state])
+
   return (
     <main className="min-h-screen bg-[#f6faf8]">
       <div className="grid min-h-screen lg:grid-cols-2">
@@ -19,17 +41,6 @@ export default function RegisterForm() {
 
           <div className="relative z-10 flex w-full flex-col justify-between p-12 xl:p-16">
 
-            {/* Logo */}
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-2xl font-bold text-white"
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
-                <Home className="h-5 w-5" />
-              </span>
-
-              RentNest
-            </Link>
 
             {/* Hero */}
             <div className="max-w-xl">
@@ -39,7 +50,7 @@ export default function RegisterForm() {
                 Trusted rental platform
               </div>
 
-              <h1 className="text-5xl font-bold leading-tight text-white xl:text-6xl">
+              <h1 className="text-3xl font-bold leading-tight text-white xl:text-5xl">
                 Your next home
                 <br />
                 is just a few
@@ -90,10 +101,7 @@ export default function RegisterForm() {
               </div>
             </div>
 
-            {/* Footer */}
-            <p className="text-sm text-emerald-100/60">
-              © 2026 RentNest. All rights reserved.
-            </p>
+
 
           </div>
         </section>
@@ -119,7 +127,7 @@ export default function RegisterForm() {
             {/* Heading */}
             <div className="mb-7">
               <p className="text-sm font-semibold text-[#338263]">
-                Get started 🚀
+                Get started
               </p>
 
               <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
@@ -132,7 +140,7 @@ export default function RegisterForm() {
             </div>
 
             {/* Form */}
-            <form className="space-y-4">
+            <form action={action} className="space-y-4">
 
               {/* Full Name */}
               <div className="space-y-2">
@@ -142,8 +150,10 @@ export default function RegisterForm() {
 
                 <Input
                   id="name"
+                  name="name"
                   type="text"
-                  placeholder="John Doe"
+                  required
+                  placeholder="Enter your full name"
                   className="h-11 bg-white focus-visible:ring-[#338263]"
                 />
               </div>
@@ -156,8 +166,10 @@ export default function RegisterForm() {
 
                 <Input
                   id="email"
+                  name="email"
                   type="email"
-                  placeholder="you@example.com"
+                  required
+                  placeholder="Enter your email"
                   className="h-11 bg-white focus-visible:ring-[#338263]"
                 />
               </div>
@@ -165,11 +177,13 @@ export default function RegisterForm() {
               {/* Role */}
               <div className="space-y-2">
                 <Label htmlFor="role">
-                  I want to
+                  Open Account Type
                 </Label>
 
                 <select
                   id="role"
+                  name="role"
+                  required
                   defaultValue=""
                   className="h-11 w-full rounded-md border border-input bg-white px-3 text-sm outline-none transition focus:border-[#338263] focus:ring-2 focus:ring-[#338263]/20"
                 >
@@ -195,7 +209,9 @@ export default function RegisterForm() {
 
                 <Input
                   id="password"
+                  name="password"
                   type="password"
+                  required
                   placeholder="Create a password"
                   className="h-11 bg-white focus-visible:ring-[#338263]"
                 />
@@ -209,7 +225,9 @@ export default function RegisterForm() {
 
                 <Input
                   id="confirmPassword"
+                  name="confirmPassword"
                   type="password"
+                  required
                   placeholder="Confirm your password"
                   className="h-11 bg-white focus-visible:ring-[#338263]"
                 />
@@ -219,6 +237,8 @@ export default function RegisterForm() {
               <div className="flex items-start gap-2 pt-1">
                 <input
                   id="terms"
+                  name="terms"
+                  required
                   type="checkbox"
                   className="mt-1 h-4 w-4 accent-[#338263]"
                 />
@@ -249,9 +269,18 @@ export default function RegisterForm() {
                 type="submit"
                 className="mt-2 h-12 w-full bg-[#338263] text-base font-semibold text-white hover:bg-[#286b50]"
               >
-                Create account
-                <ArrowRight className="ml-2 h-4 w-4" />
+                {
+                  
+                  pending ? "Creating Account..." : <div className="flex items-center justify-center">
+                    <p className="inline-block">Create Account</p>
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </div>
+                }
               </Button>
+
+              <p className="text-sm text-destructive">
+                {state && !state.success ? state.message : null}
+              </p>
 
             </form>
 
