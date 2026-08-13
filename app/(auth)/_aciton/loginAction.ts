@@ -49,13 +49,12 @@ export const loginAction = async (prevState: LoginState, formData: FormData) => 
         const decodedToken = jwt.decode(result.data.accessToken) as jwt.JwtPayload;
         
         if(decodedToken && decodedToken.role === "TENANT") {
-            redirect("/dashboard");
+            redirect("/dashboard/tenant");
         }
         else if(decodedToken && decodedToken.role === "LANDLORD") {
-            redirect("/landlord-dashboard");
-
+            redirect("/dashboard/landlord");
         }else if(decodedToken && decodedToken.role === "ADMIN") {
-            redirect("/admin-dashboard");
+            redirect("/dashboard/admin");
         }
     }
 
