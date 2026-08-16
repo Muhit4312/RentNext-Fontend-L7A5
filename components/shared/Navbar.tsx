@@ -33,7 +33,7 @@ import { useRouter } from "next/navigation"
 
 const navLinks = [
     { label: "Home", href: "/" },
-    { label: "Features", href: "/features" },
+    { label: "Properties", href: "/properties" },
     { label: "Pricing", href: "/pricing" },
     { label: "About", href: "/about" },
 ]
