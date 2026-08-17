@@ -28,6 +28,8 @@ import { cn } from "@/lib/utils"
 import { logout } from "@/service/logout"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { NavbarProps } from "@/types/user"
+import { userMenuItems } from "@/lib/config/userMenuItems"
 
 
 
@@ -38,37 +40,18 @@ const navLinks = [
     { label: "About", href: "/about" },
 ]
 
-const userMenuItems = [
-    { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { label: "Profile", href: "/profile", icon: User },
-    { label: "Billing", href: "/billing", icon: CreditCard },
-    { label: "Settings", href: "/settings", icon: Settings },
+// const userMenuItems = [
+//     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+//     { label: "Profile", href: "/profile", icon: User },
+//     { label: "Billing", href: "/billing", icon: CreditCard },
+//     { label: "Settings", href: "/settings", icon: Settings },
 
 
-]
+// ]
 
 
 
-type IUser = {
-    success: boolean;
-    statusCode: number;
-    message: string;
-    data: {
-        user: {
-            id: string;
-            name: string;
-            email: string;
-            status: string;
-            role: string;
-            createdAt: string;
-            updatedAt: string;
-        };
-    };
-}
 
-type NavbarProps = {
-    user: IUser
-}
 
 
 
@@ -83,12 +66,12 @@ export function Navbar({ user }: NavbarProps) {
             await logout();
             toast.success("Logged out successfully");
             router.push("/login");
-            
+
 
         }
     }
 
-    
+
 
     return (
         <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
@@ -158,8 +141,11 @@ export function Navbar({ user }: NavbarProps) {
                                 </DropdownMenuGroup>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuGroup>
-                                    {userMenuItems.map((item) => (
-                                        <DropdownMenuItem key={item.href} render={<Link href={item.href} />}>
+                                    {userMenuItems(user.data.user.role).map((item) => (
+                                        <DropdownMenuItem
+                                            key={item.href}
+                                            render={<Link href={item.href} />}
+                                        >
                                             <item.icon />
                                             {item.label}
                                         </DropdownMenuItem>

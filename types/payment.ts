@@ -1,4 +1,4 @@
-export interface Property {
+export interface PaymentProperty {
   id: string;
   title: string;
   description: string;
@@ -12,19 +12,8 @@ export interface Property {
   isAvailable: boolean;
   landlordId: string;
   categoryId: string;
-
   createdAt: string;
   updatedAt: string;
-
-  landlord: {
-    id: string;
-    name: string;
-    email: string;
-    status: string;
-    role: string;
-    createdAt: string;
-    updatedAt: string;
-  };
 
   category: {
     id: string;
@@ -32,8 +21,6 @@ export interface Property {
     createdAt: string;
     updatedAt: string;
   };
-
-  rentalRequest: RentalRequest[];
 }
 
 export interface RentalRequest {
@@ -46,26 +33,28 @@ export interface RentalRequest {
   status: string;
   createdAt: string;
   updatedAt: string;
+
+  property: PaymentProperty;
 }
 
-export interface PropertyMeta {
-  page: number;
-  limit: number;
-  total: number;
-  totalPage: number;
+export interface Payment {
+  id: string;
+  rentalRequestId: string;
+  tenantId: string;
+  transactionId: string;
+  amount: string;
+  provider: string;
+  status: string;
+  paidAt: string;
+  createdAt: string;
+  updatedAt: string;
+
+  rentalRequest: RentalRequest;
 }
 
-export interface PropertyResponse {
+export interface PaymentResponse {
   success: boolean;
-  statusCode: number;
+  statusCode?: number;
   message: string;
-  data: Property[];
-  meta: PropertyMeta;
-}
-
-export interface SinglePropertyResponse {
-  success: boolean;
-  statusCode: number;
-  message: string;
-  data: Property;
+  data?: Payment[];
 }
