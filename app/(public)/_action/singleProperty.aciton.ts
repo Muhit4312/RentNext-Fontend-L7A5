@@ -15,6 +15,7 @@ export async function getPropertyById(
   if (!res.ok) {
     throw new Error("Failed to fetch property");
   }
+  console.log(res);
 
   return res.json();
 }
