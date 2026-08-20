@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { LandlordProperty } from "@/types/lanlord";
 import { getLandlordProperties } from "../_action/getLandlordProperties";
+import DeletePropertyButton from "../_components/DeletePropertyButton";
 
 
 export default async function MyPropertiesPage() {
@@ -84,7 +85,7 @@ export default async function MyPropertiesPage() {
 
       {/* Empty State */}
       {properties.length === 0 ? (
-        <div className="flex min-h-[400px] flex-col items-center justify-center rounded-2xl border bg-white p-8 text-center shadow-sm">
+        <div className="flex min-h-100 flex-col items-center justify-center rounded-2xl border bg-white p-8 text-center shadow-sm">
           <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-emerald-50">
             <Home className="size-7 text-emerald-600" />
           </div>
@@ -224,13 +225,10 @@ export default async function MyPropertiesPage() {
                     Edit
                   </Link>
 
-                  <button
-                    type="button"
-                    className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-red-200 px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
-                  >
-                    <Trash2 className="size-4" />
-                    Delete
-                  </button>
+                  <DeletePropertyButton
+                    propertyId={property.id}
+                    propertyTitle={property.title}
+                  />
                 </div>
               </div>
             </div>
