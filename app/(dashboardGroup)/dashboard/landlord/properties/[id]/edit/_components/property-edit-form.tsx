@@ -3,10 +3,17 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { X, Plus } from "lucide-react";
-import { updateProperty, UpdatePropertyPayload } from "../../../_action/property.action";
+import { Loader2 } from "lucide-react";
 
+import {
+  updateProperty,
+  UpdatePropertyPayload,
+} from "../../../_action/property.action";
 
+interface Category {
+  id: string;
+  name: string;
+}
 
 interface PropertyEditFormProps {
   property: {
@@ -18,13 +25,15 @@ interface PropertyEditFormProps {
     categoryId: string;
     bedrooms: number;
     bathrooms: number;
-    images?: string[];
+    img?: string | null;
     isAvailable: boolean;
   };
+  categories: Category[];
 }
 
 export default function PropertyEditForm({
   property,
+  categories,
 }: PropertyEditFormProps) {
   const router = useRouter();
 
@@ -38,13 +47,9 @@ export default function PropertyEditForm({
     bedrooms: String(property.bedrooms ?? ""),
     bathrooms: String(property.bathrooms ?? ""),
     categoryId: property.categoryId ?? "",
+    img: property.img ?? "",
     isAvailable: property.isAvailable ?? true,
   });
-
-  const [images, setImages] = useState<string[]>(
-  property.images ?? []
-);
-  const [imageInput, setImageInput] = useState("");
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -59,36 +64,19 @@ export default function PropertyEditForm({
     }));
   };
 
-  const addImage = () => {
-    const url = imageInput.trim();
-
-    if (!url) return;
-
-    if (images.includes(url)) {
-      toast.error("This image URL is already added.");
-      return;
-    }
-
-    setImages((prev) => [...prev, url]);
-    setImageInput("");
-  };
-
-  const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
   const handleSubmit = async (
     e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
 
+    // Validation
     if (!formData.title.trim()) {
       toast.error("Property title is required.");
       return;
     }
 
     if (!formData.description.trim()) {
-      toast.error("Property description is required.");
+      toast.error("Please provide a description for the property.");
       return;
     }
 
@@ -97,13 +85,23 @@ export default function PropertyEditForm({
       return;
     }
 
-    if (!formData.categoryId.trim()) {
-      toast.error("Category is required.");
+    if (!formData.categoryId) {
+      toast.error("Please select a property category.");
       return;
     }
 
     if (Number(formData.rent) <= 0) {
-      toast.error("Rent must be greater than 0.");
+      toast.error("Monthly rent must be greater than 0.");
+      return;
+    }
+
+    if (Number(formData.bedrooms) < 0) {
+      toast.error("Bedrooms cannot be negative.");
+      return;
+    }
+
+    if (Number(formData.bathrooms) < 0) {
+      toast.error("Bathrooms cannot be negative.");
       return;
     }
 
@@ -115,10 +113,10 @@ export default function PropertyEditForm({
         description: formData.description.trim(),
         location: formData.location.trim(),
         rent: Number(formData.rent),
-        categoryId: formData.categoryId,
         bedrooms: Number(formData.bedrooms),
         bathrooms: Number(formData.bathrooms),
-        images,
+        categoryId: formData.categoryId,
+        img: formData.img.trim() || undefined,
         isAvailable: formData.isAvailable,
       };
 
@@ -134,10 +132,10 @@ export default function PropertyEditForm({
         return;
       }
 
-      toast.success("Property updated successfully!");
-
-      router.push("/dashboard/landlord/properties");
+      toast.success("Property updated successfully.");
       router.refresh();
+      router.push("/dashboard/landlord/properties");
+      
     } catch (error) {
       console.error(error);
 
@@ -152,8 +150,19 @@ export default function PropertyEditForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-6 rounded-2xl border bg-white p-6 shadow-sm"
+      className="space-y-7 rounded-2xl border bg-white p-6 shadow-sm sm:p-8"
     >
+      {/* Basic Information */}
+      <div>
+        <h2 className="text-lg font-semibold text-slate-900">
+          Property Information
+        </h2>
+
+        <p className="mt-1 text-sm text-slate-500">
+          Update the basic information about your rental property.
+        </p>
+      </div>
+
       {/* Title */}
       <div className="space-y-2">
         <label
@@ -166,11 +175,11 @@ export default function PropertyEditForm({
         <input
           id="title"
           name="title"
+          type="text"
           value={formData.title}
           onChange={handleChange}
-          required
-          placeholder="Luxury Apartment"
-          className="w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:border-[#338263] focus:ring-2 focus:ring-[#338263]/20"
+          placeholder="e.g. Spacious Family Apartment in Dhanmondi"
+          className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none transition focus:border-[#338263] focus:ring-2 focus:ring-[#338263]/20"
         />
       </div>
 
@@ -180,7 +189,7 @@ export default function PropertyEditForm({
           htmlFor="description"
           className="text-sm font-medium text-slate-700"
         >
-          Description
+          Property Description
         </label>
 
         <textarea
@@ -189,9 +198,8 @@ export default function PropertyEditForm({
           value={formData.description}
           onChange={handleChange}
           rows={5}
-          required
-          placeholder="Describe your property..."
-          className="w-full resize-none rounded-lg border px-3 py-2.5 text-sm outline-none focus:border-[#338263] focus:ring-2 focus:ring-[#338263]/20"
+          placeholder="Describe the property's condition, facilities, surroundings, and other important details."
+          className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none transition focus:border-[#338263] focus:ring-2 focus:ring-[#338263]/20"
         />
       </div>
 
@@ -207,16 +215,17 @@ export default function PropertyEditForm({
         <input
           id="location"
           name="location"
+          type="text"
           value={formData.location}
           onChange={handleChange}
-          required
-          placeholder="Dhaka"
-          className="w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:border-[#338263] focus:ring-2 focus:ring-[#338263]/20"
+          placeholder="e.g. Dhanmondi, Dhaka"
+          className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none transition focus:border-[#338263] focus:ring-2 focus:ring-[#338263]/20"
         />
       </div>
 
       {/* Rent / Bedrooms / Bathrooms */}
       <div className="grid gap-5 md:grid-cols-3">
+        {/* Rent */}
         <div className="space-y-2">
           <label
             htmlFor="rent"
@@ -232,11 +241,12 @@ export default function PropertyEditForm({
             min="1"
             value={formData.rent}
             onChange={handleChange}
-            required
-            className="w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:border-[#338263] focus:ring-2 focus:ring-[#338263]/20"
+            placeholder="85000"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none transition focus:border-[#338263] focus:ring-2 focus:ring-[#338263]/20"
           />
         </div>
 
+        {/* Bedrooms */}
         <div className="space-y-2">
           <label
             htmlFor="bedrooms"
@@ -252,11 +262,12 @@ export default function PropertyEditForm({
             min="0"
             value={formData.bedrooms}
             onChange={handleChange}
-            required
-            className="w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:border-[#338263] focus:ring-2 focus:ring-[#338263]/20"
+            placeholder="3"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none transition focus:border-[#338263] focus:ring-2 focus:ring-[#338263]/20"
           />
         </div>
 
+        {/* Bathrooms */}
         <div className="space-y-2">
           <label
             htmlFor="bathrooms"
@@ -272,8 +283,8 @@ export default function PropertyEditForm({
             min="0"
             value={formData.bathrooms}
             onChange={handleChange}
-            required
-            className="w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:border-[#338263] focus:ring-2 focus:ring-[#338263]/20"
+            placeholder="2"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none transition focus:border-[#338263] focus:ring-2 focus:ring-[#338263]/20"
           />
         </div>
       </div>
@@ -284,76 +295,68 @@ export default function PropertyEditForm({
           htmlFor="categoryId"
           className="text-sm font-medium text-slate-700"
         >
-          Category ID
+          Property Category
         </label>
 
-        <input
+        <select
           id="categoryId"
           name="categoryId"
           value={formData.categoryId}
           onChange={handleChange}
-          required
-          className="w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:border-[#338263] focus:ring-2 focus:ring-[#338263]/20"
-        />
+          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-[#338263] focus:ring-2 focus:ring-[#338263]/20"
+        >
+          <option value="" disabled>
+            Select a property category
+          </option>
+
+          {categories.map((category) => (
+            <option
+              key={category.id}
+              value={category.id}
+            >
+              {category.name}
+            </option>
+          ))}
+        </select>
+
+        <p className="text-xs text-slate-400">
+          Choose the category that best describes this property.
+        </p>
       </div>
 
-      {/* Images */}
-      <div className="space-y-3">
-        <label className="text-sm font-medium text-slate-700">
-          Property Images
+      {/* Image */}
+      <div className="space-y-2">
+        <label
+          htmlFor="img"
+          className="text-sm font-medium text-slate-700"
+        >
+          Property Image URL
         </label>
 
-        <div className="flex gap-2">
-          <input
-            value={imageInput}
-            onChange={(e) => setImageInput(e.target.value)}
-            placeholder="https://example.com/image.jpg"
-            className="flex-1 rounded-lg border px-3 py-2.5 text-sm outline-none focus:border-[#338263] focus:ring-2 focus:ring-[#338263]/20"
-          />
+        <input
+          id="img"
+          name="img"
+          type="url"
+          value={formData.img}
+          onChange={handleChange}
+          placeholder="https://example.com/property-image.jpg"
+          className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none transition focus:border-[#338263] focus:ring-2 focus:ring-[#338263]/20"
+        />
 
-          <button
-            type="button"
-            onClick={addImage}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
-          >
-            <Plus className="size-4" />
-            Add
-          </button>
-        </div>
-
-        {images.length > 0 && (
-          <div className="space-y-2">
-            {images.map((image, index) => (
-              <div
-                key={`${image}-${index}`}
-                className="flex items-center justify-between rounded-lg border bg-slate-50 px-3 py-2"
-              >
-                <p className="max-w-[80%] truncate text-xs text-slate-600">
-                  {image}
-                </p>
-
-                <button
-                  type="button"
-                  onClick={() => removeImage(index)}
-                  className="rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-500"
-                >
-                  <X className="size-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+        <p className="text-xs text-slate-400">
+          Provide a publicly accessible image URL for your property.
+        </p>
       </div>
 
       {/* Availability */}
-      <div className="flex items-center justify-between rounded-xl border bg-slate-50 p-4">
+      <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4">
         <div>
           <p className="text-sm font-medium text-slate-900">
             Property Availability
           </p>
 
           <p className="mt-1 text-xs text-slate-500">
-            Allow tenants to request this property.
+            Allow tenants to send rental requests for this property.
           </p>
         </div>
 
@@ -370,9 +373,10 @@ export default function PropertyEditForm({
               ? "bg-[#338263]"
               : "bg-slate-300"
           }`}
+          aria-label="Toggle property availability"
         >
           <span
-            className={`absolute top-1 size-4 rounded-full bg-white transition ${
+            className={`absolute top-1 size-4 rounded-full bg-white shadow-sm transition ${
               formData.isAvailable
                 ? "left-6"
                 : "left-1"
@@ -382,14 +386,16 @@ export default function PropertyEditForm({
       </div>
 
       {/* Actions */}
-      <div className="flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:justify-end">
+      <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:justify-end">
         <button
           type="button"
           disabled={loading}
           onClick={() =>
-            router.push("/dashboard/landlord/properties")
+            router.push(
+              "/dashboard/landlord/properties"
+            )
           }
-          className="rounded-lg border px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          className="rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Cancel
         </button>
@@ -397,9 +403,15 @@ export default function PropertyEditForm({
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-[#338263] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#286b51] disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#338263] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#286b51] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading ? "Updating..." : "Update Property"}
+          {loading && (
+            <Loader2 className="size-4 animate-spin" />
+          )}
+
+          {loading
+            ? "Saving Changes..."
+            : "Save Changes"}
         </button>
       </div>
     </form>

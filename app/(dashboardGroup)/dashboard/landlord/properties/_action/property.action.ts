@@ -3,14 +3,14 @@
 import { cookies } from "next/headers";
 
 export interface UpdatePropertyPayload {
-  title: string;
-  description: string;
-  location: string;
-  rent: number;
-  categoryId: string;
-  bedrooms: number;
-  bathrooms: number;
-  images?: string[];
+  title?: string;
+  description?: string;
+  location?: string;
+  rent?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  categoryId?: string;
+  img?: string;
   isAvailable?: boolean;
 }
 
@@ -30,7 +30,7 @@ export async function updateProperty(
   }
 
   const res = await fetch(
-    `${process.env.BACKEND_API_URL}/api/properties/${propertyId}`,
+    `${process.env.BACKEND_API_URL}/api/landlord/properties/${propertyId}`,
     {
       method: "PUT",
       headers: {
