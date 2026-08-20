@@ -69,3 +69,40 @@ export interface SinglePropertyResponse {
   message: string;
   data: Property;
 }
+
+export interface LandlordProperty {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  img: string | null;
+  address: string | null;
+  city: string | null;
+  rent: string | number;
+  bedrooms: number;
+  bathrooms: number;
+  isAvailable: boolean;
+  landlordId: string;
+  categoryId: string;
+  createdAt: string;
+  updatedAt: string;
+
+  category: {
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+
+  rentalRequest: {
+    id: string;
+    note: string;
+    moveInDate: string;
+    message: string;
+    propertyId: string;
+    tenantId: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+  }[];
+}
