@@ -2,37 +2,21 @@
 
 import { cookies } from "next/headers";
 import {
-  AdminProperty,
-  AdminPropertiesMeta,
+  AdminRental,
+  AdminRentalsResponse,
 } from "../_types/types";
 
-interface GetAdminPropertiesParams {
+interface GetAdminRentalsParams {
   page?: number;
   limit?: number;
   searchTerm?: string;
 }
 
-interface GetAdminPropertiesSuccess {
-  success: true;
-  message: string;
-  data: AdminProperty[];
-  meta: AdminPropertiesMeta;
-}
-
-interface GetAdminPropertiesError {
-  success: false;
-  message: string;
-  data: null;
-  meta: null;
-}
-
-export async function getAdminProperties({
+export async function getAdminRentals({
   page = 1,
   limit = 10,
   searchTerm,
-}: GetAdminPropertiesParams = {}): Promise<
-  GetAdminPropertiesSuccess | GetAdminPropertiesError
-> {
+}: GetAdminRentalsParams = {}): Promise<AdminRentalsResponse> {
   const cookieStore = await cookies();
 
   const accessToken = cookieStore.get("accessToken")?.value;
@@ -41,7 +25,7 @@ export async function getAdminProperties({
     return {
       success: false,
       message: "You are not authenticated.",
-      data: null,
+      data: [],
       meta: null,
     };
   }
@@ -51,12 +35,12 @@ export async function getAdminProperties({
     limit: String(limit),
   });
 
-  if (searchTerm) {
-    params.set("searchTerm", searchTerm);
+  if (searchTerm?.trim()) {
+    params.set("searchTerm", searchTerm.trim());
   }
 
   const res = await fetch(
-    `${process.env.BACKEND_API_URL}/api/admin/properties?${params.toString()}`,
+    `${process.env.BACKEND_API_URL}/api/admin/rentals?${params.toString()}`,
     {
       method: "GET",
       headers: {
@@ -71,8 +55,9 @@ export async function getAdminProperties({
   if (!res.ok || !result.success) {
     return {
       success: false,
-      message: result.message || "Failed to fetch properties.",
-      data: null,
+      message:
+        result.message || "Failed to fetch rental requests.",
+      data: [],
       meta: null,
     };
   }
@@ -80,7 +65,7 @@ export async function getAdminProperties({
   return {
     success: true,
     message: result.message,
-    data: result.data,
+    data: result.data as AdminRental[],
     meta: result.meta,
   };
 }

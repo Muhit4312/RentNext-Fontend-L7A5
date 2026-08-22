@@ -1,15 +1,16 @@
-import { getAdminProperties } from "../_action/get-admin-properties";
-import AdminPropertiesPagination from "./_components/AdminPropertiesPagination";
-import AdminPropertiesTable from "./_components/AdminPropertiesTable";
-import { AdminProperty } from "./_types/types";
+import { getAdminRentals } from "../_action/get-admin-rentals";
+import AdminRentalsPagination from "./_components/AdminRentalsPagination";
+import AdminRentalsTable from "./_components/AdminRentalsTable";
+import { AdminRental } from "./_types/types";
 
 interface PageProps {
   searchParams: Promise<{
     page?: string;
+    searchTerm?: string;
   }>;
 }
 
-const AdminPropertiesPage = async ({
+const AdminRentalsPage = async ({
   searchParams,
 }: PageProps) => {
   const params = await searchParams;
@@ -17,16 +18,17 @@ const AdminPropertiesPage = async ({
   const page = Number(params.page) || 1;
   const limit = 10;
 
-  const result = await getAdminProperties({
+  const result = await getAdminRentals({
     page,
     limit,
+    searchTerm: params.searchTerm,
   });
 
   if (!result.success) {
     return (
       <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-6">
         <h2 className="font-semibold text-destructive">
-          Failed to load properties
+          Failed to load rental requests
         </h2>
 
         <p className="mt-1 text-sm text-muted-foreground">
@@ -36,21 +38,21 @@ const AdminPropertiesPage = async ({
     );
   }
 
-  // Explicitly type the properties
-  const properties: AdminProperty[] = result.data ?? [];
-
+  
+  const rentals = result.data;
   const meta = result.meta;
 
-  // Calculate stats
-  const availableProperties = properties.filter(
-    (property: AdminProperty) => property.isAvailable
+  const pendingRequests = rentals.filter(
+    (rental: AdminRental) => rental.status === "PENDING"
   ).length;
 
-  const rentalRequests = properties.reduce(
-    (total: number, property: AdminProperty) =>
-      total + property.rentalRequest.length,
-    0
-  );
+  const approvedRequests = rentals.filter(
+    (rental: AdminRental) => rental.status === "APPROVED"
+  ).length;
+
+  const completedRequests = rentals.filter(
+    (rental: AdminRental) => rental.status === "COMPLETED"
+  ).length;
 
   return (
     <div className="space-y-8">
@@ -61,21 +63,21 @@ const AdminPropertiesPage = async ({
         </p>
 
         <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
-          Properties
+          Rental Requests
         </h1>
 
         <p className="mt-2 text-sm text-muted-foreground">
-          Monitor and review all rental properties listed
-          on RentNest.
+          Monitor rental requests submitted by tenants
+          across the RentNest platform.
         </p>
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-4">
         {/* Total */}
         <div className="rounded-xl border bg-card p-5">
           <p className="text-sm text-muted-foreground">
-            Total Properties
+            Total Requests
           </p>
 
           <p className="mt-2 text-2xl font-bold">
@@ -83,37 +85,46 @@ const AdminPropertiesPage = async ({
           </p>
         </div>
 
-        {/* Available */}
+        {/* Pending */}
         <div className="rounded-xl border bg-card p-5">
           <p className="text-sm text-muted-foreground">
-            Available
+            Pending
           </p>
 
           <p className="mt-2 text-2xl font-bold">
-            {availableProperties}
+            {pendingRequests}
           </p>
         </div>
 
-        {/* Rental Requests */}
+        {/* Approved */}
         <div className="rounded-xl border bg-card p-5">
           <p className="text-sm text-muted-foreground">
-            Rental Requests
+            Approved
           </p>
 
           <p className="mt-2 text-2xl font-bold">
-            {rentalRequests}
+            {approvedRequests}
+          </p>
+        </div>
+
+        {/* Completed */}
+        <div className="rounded-xl border bg-card p-5">
+          <p className="text-sm text-muted-foreground">
+            Completed
+          </p>
+
+          <p className="mt-2 text-2xl font-bold">
+            {completedRequests}
           </p>
         </div>
       </div>
 
       {/* Table */}
-      <AdminPropertiesTable
-        properties={properties}
-      />
+      <AdminRentalsTable rentals={rentals} />
 
       {/* Pagination */}
       {meta && (
-        <AdminPropertiesPagination
+        <AdminRentalsPagination
           page={meta.page}
           totalPage={meta.totalPage}
         />
@@ -122,4 +133,4 @@ const AdminPropertiesPage = async ({
   );
 };
 
-export default AdminPropertiesPage;
+export default AdminRentalsPage;

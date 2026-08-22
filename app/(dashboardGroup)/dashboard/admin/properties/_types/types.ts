@@ -1,10 +1,3 @@
-export type RentalStatus =
-  | "PENDING"
-  | "APPROVED"
-  | "REJECTED"
-  | "ACTIVE"
-  | "COMPLETED";
-
 export interface AdminProperty {
   id: string;
   title: string;
@@ -29,6 +22,13 @@ export interface AdminProperty {
 
   rentalRequest: {
     id: string;
-    status: RentalStatus;
+    status: string;
   }[];
+}
+
+export interface AdminPropertiesMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPage: number;
 }
