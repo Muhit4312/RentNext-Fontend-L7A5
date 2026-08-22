@@ -73,8 +73,18 @@ export async function proxy(request: NextRequest) {
 
     const isPublicRoute = PUBLIC_ROUTES.some((route) => path === route || path.startsWith(route + '/'))
 
-    if (!accessToken && !isPublicRoute) {
-        return NextResponse.redirect(new URL('/login', request.url))
+    // if (!accessToken && !isPublicRoute) {
+        
+    //     return NextResponse.redirect(new URL('/login', request.url))
+    // }
+
+     if (!accessToken && !isPublicRoute) {
+
+        const loginUrl = new URL('/login', request.url)
+
+        loginUrl.searchParams.set("redirectTo", path)
+        
+        return NextResponse.redirect(loginUrl)
     }
 
     
